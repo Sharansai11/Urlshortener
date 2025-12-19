@@ -3,11 +3,14 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy frontend files
-COPY frontend/package*.json ./
+# Copy package files first for better caching
+COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install
 
+# Copy all frontend files
 COPY frontend/ .
+
+# Build the React app
 RUN npm run build
 
 # Install serve to run the app
