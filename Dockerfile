@@ -1,8 +1,5 @@
-# Multi-stage build for Railway deployment
-FROM maven:3.9-openjdk-21 AS java-builder
-
-# Copy parent pom first
-COPY pom.xml /app/pom.xml
+# Simple single-service approach for Railway
+FROM maven:3.9-eclipse-temurin-21 AS java-builder
 
 # Build create-service
 WORKDIR /app/create-service
@@ -22,39 +19,17 @@ WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm install
 COPY frontend/ .
-# Set API URL for production
-ENV REACT_APP_API_URL=https://urlshortener-production.up.railway.app
 RUN npm run build
 
-# Final runtime stage with embedded database
-FROM openjdk:21-jdk-slim
+# Final runtime stage - simple nginx + static files
+FROM nginx:alpine
 
-# Install nginx, postgresql, redis
-RUN apt-get update && apt-get install -y \
-    nginx \
-    postgresql \
-    redis-server \
-    supervisor \
-    && rm -rf /var/lib/apt/lists/*
+# Copy frontend build
+COPY --from=frontend-builder /app/frontend/build /usr/share/nginx/html
 
-# Copy built applications
-COPY --from=java-builder /app/create-service/target/create-service-0.0.1-SNAPSHOT.jar /app/create-service.jar
-COPY --from=java-builder /app/redirect-service/target/redirect-service-0.0.1-SNAPSHOT.jar /app/redirect-service.jar
-COPY --from=frontend-builder /app/frontend/build /var/www/html
+# Copy nginx config for frontend only
+COPY frontend-nginx.conf /etc/nginx/nginx.conf
 
-# Copy configurations
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY init-db.sql /docker-entrypoint-initdb.d/init-db.sql
+EXPOSE 80
 
-# Setup PostgreSQL
-USER postgres
-RUN /etc/init.d/postgresql start && \
-    psql --command "CREATE USER urluser WITH SUPERUSER PASSWORD 'urlpass';" && \
-    createdb -O urluser urlshortener
-
-USER root
-
-EXPOSE 8080
-
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["nginx", "-g", "daemon off;"]

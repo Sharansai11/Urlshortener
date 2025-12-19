@@ -14,29 +14,13 @@ function App() {
     setLoading(true);
     setError('');
     
-    try {
-      // Use environment variable for API URL, fallback to localhost for development
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
-      
-      const response = await fetch(`${apiUrl}/api/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url: url.trim() }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setShortUrl(`${apiUrl}/api/redirect/${data.shortCode}`);
-      } else {
-        setError('Failed to create short URL');
-      }
-    } catch (err) {
-      setError('Network error occurred');
-    } finally {
+    // Demo mode - simulate URL shortening
+    setTimeout(() => {
+      const mockShortCode = Math.random().toString(36).substring(2, 10);
+      const baseUrl = window.location.origin;
+      setShortUrl(`${baseUrl}/r/${mockShortCode}`);
       setLoading(false);
-    }
+    }, 1000);
   };
 
   const handleTest = () => {
@@ -73,8 +57,8 @@ function App() {
             <div className="short-url">
               <input type="text" value={shortUrl} readOnly />
               <button onClick={() => navigator.clipboard.writeText(shortUrl)}>Copy</button>
-              <button onClick={handleTest}>Test</button>
             </div>
+            <p className="demo-note">🎯 Demo Mode: This shows how the URL shortener interface works</p>
           </div>
         )}
       </div>
