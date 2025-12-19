@@ -10,8 +10,7 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files
-*.jar
+# Package Files (but allow target JARs for deployment)
 *.war
 *.nar
 *.ear
@@ -25,6 +24,7 @@ replay_pid*
 
 # Maven
 target/
+!target/*.jar
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
