@@ -1,22 +1,19 @@
-# Frontend-only deployment for Railway
-FROM node:18-alpine AS builder
+# RAILWAY DEPLOYMENT - Frontend Only
+FROM node:18-alpine
 
 WORKDIR /app
+
+# Copy frontend files
 COPY frontend/package*.json ./
 RUN npm install
 
 COPY frontend/ .
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
+# Install serve to run the app
+RUN npm install -g serve
 
-# Copy built app
-COPY --from=builder /app/build /usr/share/nginx/html
+EXPOSE 3000
 
-# Copy nginx config
-COPY frontend-nginx.conf /etc/nginx/nginx.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# Serve the built React app
+CMD ["serve", "-s", "build", "-l", "3000"]

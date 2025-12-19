@@ -1,5 +1,0 @@
-CREATE TABLE IF NOT EXISTS url (
-    short_code VARCHAR(8) PRIMARY KEY,
-    original_url TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
