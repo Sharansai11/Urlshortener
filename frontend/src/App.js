@@ -15,7 +15,10 @@ function App() {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:8080/api/create', {
+      // Use environment variable for API URL, fallback to localhost for development
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+      
+      const response = await fetch(`${apiUrl}/api/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -25,7 +28,7 @@ function App() {
 
       if (response.ok) {
         const data = await response.json();
-        setShortUrl(`http://localhost:8080/api/redirect/${data.shortCode}`);
+        setShortUrl(`${apiUrl}/api/redirect/${data.shortCode}`);
       } else {
         setError('Failed to create short URL');
       }
@@ -69,6 +72,7 @@ function App() {
             <h3>Shortened URL:</h3>
             <div className="short-url">
               <input type="text" value={shortUrl} readOnly />
+              <button onClick={() => navigator.clipboard.writeText(shortUrl)}>Copy</button>
               <button onClick={handleTest}>Test</button>
             </div>
           </div>
