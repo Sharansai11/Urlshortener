@@ -1,11 +1,21 @@
 FROM node:18-alpine
+
 WORKDIR /app
-COPY package*.json ./
+
+# Copy package files
+COPY package.json package-lock.json* ./
 RUN npm install
+
+# Copy source files
 COPY . .
+
+# Build the app
 RUN npm run build
 
-# Use serve to serve the built app
+# Install serve
 RUN npm install -g serve
+
 EXPOSE 3000
+
+# Serve the built app
 CMD ["serve", "-s", "build", "-l", "3000"]
