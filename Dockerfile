@@ -1,33 +1,20 @@
-# Simple single-service approach for Railway
-FROM maven:3.9-eclipse-temurin-21 AS java-builder
+# Frontend-only deployment for Railway
+FROM node:18-alpine AS builder
 
-# Build create-service
-WORKDIR /app/create-service
-COPY create-service/pom.xml .
-COPY create-service/src ./src
-RUN mvn clean package -DskipTests
-
-# Build redirect-service  
-WORKDIR /app/redirect-service
-COPY redirect-service/pom.xml .
-COPY redirect-service/src ./src
-RUN mvn clean package -DskipTests
-
-# Frontend build stage
-FROM node:18-alpine AS frontend-builder
-WORKDIR /app/frontend
+WORKDIR /app
 COPY frontend/package*.json ./
 RUN npm install
+
 COPY frontend/ .
 RUN npm run build
 
-# Final runtime stage - simple nginx + static files
+# Production stage
 FROM nginx:alpine
 
-# Copy frontend build
-COPY --from=frontend-builder /app/frontend/build /usr/share/nginx/html
+# Copy built app
+COPY --from=builder /app/build /usr/share/nginx/html
 
-# Copy nginx config for frontend only
+# Copy nginx config
 COPY frontend-nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
