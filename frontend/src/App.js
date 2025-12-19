@@ -15,26 +15,15 @@ function App() {
     setError('');
     
     try {
-      // Use environment variable for API URL, fallback to localhost for development
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
-      
-      const response = await fetch(`${apiUrl}/api/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url: url.trim() }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setShortUrl(`${apiUrl}/api/redirect/${data.shortCode}`);
-      } else {
-        setError('Failed to create short URL');
-      }
+      // For now, use demo mode until backend is deployed
+      // TODO: Replace with real backend URL after deployment
+      const mockShortCode = Math.random().toString(36).substring(2, 10);
+      setTimeout(() => {
+        setShortUrl(`https://short.ly/${mockShortCode}`);
+        setLoading(false);
+      }, 1000);
     } catch (err) {
       setError('Network error occurred');
-    } finally {
       setLoading(false);
     }
   };
